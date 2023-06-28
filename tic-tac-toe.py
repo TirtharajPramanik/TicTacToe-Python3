@@ -1,5 +1,6 @@
 debug = False
 autofill_lastmove = True
+marks_2 = ["u", "n"]  # ['X','O']
 
 print("\x1B[0m")
 
@@ -73,9 +74,9 @@ clear = (
 
 out = (
     lambda val: "\x1B[31m" + val + "\x1B[39m"
-    if val == "X"
+    if val == marks_2[0]
     else "\x1B[34m" + val + "\x1B[39m"
-    if val == "O"
+    if val == marks_2[1]
     else val
 )
 
@@ -123,7 +124,7 @@ if autofill_lastmove:
     def find_move():
         for row in matrix:
             for col in row:
-                if col not in ["X", "O"]:
+                if col not in marks_2:
                     return loc(int(col))
         raise IndexError("no empty locations, after only", move, "moves")
 
@@ -131,7 +132,9 @@ if autofill_lastmove:
         if move == 8:
             row, col = find_move()
             global mark
-            mark = "X"
+            if mark == marks_2[0]:
+                raise ValueError("game ending with wrong mark")
+            mark = marks_2[0]
             matrix[row][col] = mark
             gameover(mark if evaluate(row, col) else "nobody")
 
@@ -147,7 +150,7 @@ show_board()
 
 # update
 while True:
-    for mark in ["X", "O"]:
+    for mark in marks_2:
         while True:
             try:
                 pos = int(input(out(mark) + " :- \x1B[0J"))
@@ -161,7 +164,8 @@ while True:
                     if move > 4:
                         if evaluate(row, col):
                             gameover(mark)
-                        evaluate_last_move()
+                        else:
+                            evaluate_last_move()
                     break
                 else:
                     warn(pos, "is occupied")
